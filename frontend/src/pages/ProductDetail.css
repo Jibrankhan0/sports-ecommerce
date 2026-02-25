@@ -1,0 +1,296 @@
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.breadcrumb a {
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.breadcrumb a:hover {
+    color: var(--accent);
+}
+
+.breadcrumb span {
+    color: var(--text);
+}
+
+.pd-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 2rem;
+}
+
+.pd-main-img {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--bg-card2);
+    border: 1px solid var(--border);
+    aspect-ratio: 4/3;
+}
+
+.pd-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.5s ease;
+}
+
+.pd-main-img:hover .pd-img {
+    transform: scale(1.06);
+}
+
+.pd-discount-tag {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: var(--danger);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+}
+
+.pd-thumbs {
+    display: flex;
+    gap: 0.6rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.pd-thumb {
+    width: 72px;
+    height: 72px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    border: 2px solid var(--border);
+    cursor: pointer;
+    transition: var(--transition);
+    background: none;
+}
+
+.pd-thumb.active,
+.pd-thumb:hover {
+    border-color: var(--accent);
+}
+
+.pd-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pd-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.pd-category {
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent);
+}
+
+.pd-title {
+    font-family: 'Rajdhani';
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.pd-brand {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+}
+
+.pd-rating-row {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    flex-wrap: wrap;
+}
+
+.pd-price-block {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+
+.pd-price {
+    font-family: 'Rajdhani';
+    font-size: 2.2rem;
+    font-weight: 700;
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.pd-stock {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 0.4rem 0.9rem;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.pd-stock.in-stock {
+    background: rgba(0, 230, 118, 0.1);
+    color: var(--success);
+}
+
+.pd-stock.out-stock {
+    background: rgba(255, 82, 82, 0.1);
+    color: var(--danger);
+}
+
+.pd-desc {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.8;
+}
+
+.pd-specs {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.pd-specs-toggle {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    background: var(--bg-card2);
+    text-align: left;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.pd-specs-toggle:hover {
+    background: var(--bg-input);
+}
+
+.pd-specs-body {
+    padding: 0.75rem 1rem;
+}
+
+.pd-spec-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.87rem;
+}
+
+.pd-spec-row:last-child {
+    border-bottom: none;
+}
+
+.pd-spec-key {
+    color: var(--text-muted);
+    flex: 1;
+}
+
+.pd-spec-val {
+    color: var(--text);
+    font-weight: 500;
+    flex: 1;
+    text-align: right;
+}
+
+.pd-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.qty-control {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+}
+
+.qty-control button {
+    padding: 0.7rem 1rem;
+    background: none;
+    color: var(--text);
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.qty-control button:hover {
+    background: var(--bg-input);
+}
+
+.qty-control span {
+    padding: 0.7rem 1rem;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    font-weight: 600;
+    min-width: 48px;
+    text-align: center;
+}
+
+.wishlist-toggle-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.wishlist-toggle-btn.active,
+.wishlist-toggle-btn:hover {
+    color: var(--danger);
+    border-color: var(--danger);
+    background: rgba(255, 82, 82, 0.08);
+}
+
+.reviews-layout {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 2rem;
+    align-items: start;
+}
+
+.reviewer-avatar {
+    background: var(--accent-gradient);
+}
+
+@media (max-width:900px) {
+    .pd-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reviews-layout {
+        grid-template-columns: 1fr;
+    }
+}
