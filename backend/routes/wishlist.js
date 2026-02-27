@@ -1,18 +1,17 @@
 const express = require('express');
-const pool = require('../config/db');
+const Wishlist = require('../models/Wishlist');
 const { auth } = require('../middleware/auth');
 const router = express.Router();
 
 // Get user wishlist
 router.get('/', auth, async (req, res) => {
     try {
-        const [items] = await pool.query(
-            `SELECT w.id, p.id as product_id, p.name, p.price, p.discount_price, p.images, p.rating, p.stock, c.name as category
-       FROM wishlist w JOIN products p ON w.product_id=p.id LEFT JOIN categories c ON p.category_id=c.id
-       WHERE w.user_id=?`,
-            [req.user.id]
-        );
-        res.json(items.map(i => ({ ...i, images: parseImages(i.images) })));
+        let wishlist = await Wishlist.findOne({ user: req.user.id }).populate('products', 'name price discount_price images rating stock');
+        if (!wishlist) {
+            wishlist = new Wishlist({ user: req.user.id, products: [] });
+            await wishlist.save();
+        }
+        res.json(wishlist.products);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
@@ -20,7 +19,15 @@ router.get('/', auth, async (req, res) => {
 router.post('/', auth, async (req, res) => {
     try {
         const { product_id } = req.body;
-        await pool.query('INSERT IGNORE INTO wishlist (user_id, product_id) VALUES (?, ?)', [req.user.id, product_id]);
+        let wishlist = await Wishlist.findOne({ user: req.user.id });
+        if (!wishlist) {
+            wishlist = new Wishlist({ user: req.user.id, products: [product_id] });
+        } else {
+            if (!wishlist.products.includes(product_id)) {
+                wishlist.products.push(product_id);
+            }
+        }
+        await wishlist.save();
         res.json({ message: 'Added to wishlist' });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -28,15 +35,13 @@ router.post('/', auth, async (req, res) => {
 // Remove from wishlist
 router.delete('/:productId', auth, async (req, res) => {
     try {
-        await pool.query('DELETE FROM wishlist WHERE user_id=? AND product_id=?', [req.user.id, req.params.productId]);
+        let wishlist = await Wishlist.findOne({ user: req.user.id });
+        if (wishlist) {
+            wishlist.products = wishlist.products.filter(p => p.toString() !== req.params.productId);
+            await wishlist.save();
+        }
         res.json({ message: 'Removed from wishlist' });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
-
-function parseImages(images) {
-    if (!images) return [];
-    if (Array.isArray(images)) return images;
-    try { return JSON.parse(images); } catch { return []; }
-}
 
 module.exports = router;

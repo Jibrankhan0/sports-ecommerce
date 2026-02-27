@@ -1,0 +1,40 @@
+services:
+  # Backend Web Service
+  - type: web
+    name: sports-ecommerce-backend
+    env: node
+    plan: free
+    region: singapore
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false # Set as secret in Render dashboard
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CLIENT_URL
+        fromService:
+          name: sports-ecommerce-frontend
+          type: static
+
+  # Frontend Static Site
+  - type: web
+    name: sports-ecommerce-frontend
+    env: static
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishDir: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: sports-ecommerce-backend
+          property: host

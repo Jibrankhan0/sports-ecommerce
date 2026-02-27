@@ -1,12 +1,15 @@
 const express = require('express');
-const pool = require('../config/db');
+const Category = require('../models/Category');
 const router = express.Router();
 
+// Get all categories
 router.get('/', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM categories ORDER BY name');
-        res.json(rows);
-    } catch (err) { res.status(500).json({ message: err.message }); }
+        const categories = await Category.find().sort('name');
+        res.json(categories);
+    } catch (err) {
+        res.status(500).json({ message: err.message });
+    }
 });
 
 module.exports = router;

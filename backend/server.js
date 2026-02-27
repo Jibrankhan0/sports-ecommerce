@@ -1,9 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const connectDB = require('./config/db');
 require('dotenv').config();
 
+connectDB();
+
 const app = express();
+
+if (!process.env.MONGODB_URI) {
+    console.error('❌ Error: MONGODB_URI is not defined in environment variables');
+    // Don't exit process in dev, but in prod it might be wise
+}
 
 // Middleware
 app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173', credentials: true }));

@@ -1,5 +1,8 @@
 const express = require('express');
-const pool = require('../config/db');
+const Product = require('../models/Product');
+const Category = require('../models/Category');
+const Order = require('../models/Order');
+const User = require('../models/User');
 const { adminAuth } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
@@ -20,42 +23,58 @@ const upload = multer({
 // ---- ANALYTICS (Renamed to /stats for frontend) ----
 router.get('/stats', adminAuth, async (req, res) => {
     try {
-        const [[{ total_revenue }]] = await pool.query("SELECT COALESCE(SUM(total),0) as total_revenue FROM orders WHERE status != 'cancelled'");
-        const [[{ total_orders }]] = await pool.query('SELECT COUNT(*) as total_orders FROM orders');
-        const [[{ total_users }]] = await pool.query("SELECT COUNT(*) as total_users FROM users WHERE role='user'");
-        const [[{ total_products }]] = await pool.query('SELECT COUNT(*) as total_products FROM products');
+        const stats = await Promise.all([
+            Order.aggregate([
+                { $match: { status: { $ne: 'cancelled' } } },
+                { $group: { _id: null, total: { $sum: '$total' } } }
+            ]),
+            Order.countDocuments(),
+            User.countDocuments({ role: 'user' }),
+            Product.countDocuments()
+        ]);
 
-        const [monthly_revenue] = await pool.query(`
-            SELECT DATE_FORMAT(created_at,'%Y-%m') as month, SUM(total) as total
-            FROM orders WHERE created_at >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
-            GROUP BY month ORDER BY month
-        `);
+        const totalRevenue = stats[0][0]?.total || 0;
+        const totalOrders = stats[1];
+        const totalUsers = stats[2];
+        const totalProducts = stats[3];
 
-        const [top_products] = await pool.query(`
-            SELECT p.name, SUM(oi.quantity) as sold
-            FROM order_items oi
-            JOIN products p ON oi.product_id = p.id
-            GROUP BY p.id
-            ORDER BY sold DESC
-            LIMIT 5
-        `);
+        const monthlyRevenue = await Order.aggregate([
+            { $match: { createdAt: { $gte: new Date(new Date().setMonth(new Date().getMonth() - 6)) } } },
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+                    total: { $sum: "$total" }
+                }
+            },
+            { $sort: { _id: 1 } },
+            { $project: { month: "$_id", total: 1, _id: 0 } }
+        ]);
 
-        const [low_stock] = await pool.query(`
-            SELECT p.*, c.name as category_name 
-            FROM products p 
-            LEFT JOIN categories c ON p.category_id = c.id 
-            WHERE p.stock < 10 
-            LIMIT 10
-        `);
+        const topProducts = await Order.aggregate([
+            { $unwind: "$items" },
+            {
+                $group: {
+                    _id: "$items.product",
+                    name: { $first: "$items.product_name" },
+                    sold: { $sum: "$items.quantity" }
+                }
+            },
+            { $sort: { sold: -1 } },
+            { $limit: 5 }
+        ]);
+
+        const lowStock = await Product.find({ stock: { $lt: 10 } })
+            .populate('category', 'name')
+            .limit(10);
 
         res.json({
-            revenue: total_revenue,
-            orders: total_orders,
-            users: total_users,
-            products: total_products,
-            monthlyRevenue: monthly_revenue,
-            topProducts: top_products,
-            lowStockProducts: low_stock
+            revenue: totalRevenue,
+            orders: totalOrders,
+            users: totalUsers,
+            products: totalProducts,
+            monthlyRevenue,
+            topProducts,
+            lowStockProducts: lowStock
         });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -64,13 +83,17 @@ router.get('/stats', adminAuth, async (req, res) => {
 router.get('/products', adminAuth, async (req, res) => {
     try {
         const { search } = req.query;
-        let where = '1=1', params = [];
-        if (search) { where += ' AND (p.name LIKE ? OR p.brand LIKE ?)'; params.push(`%${search}%`, `%${search}%`); }
-        const [products] = await pool.query(
-            `SELECT p.*, c.name as category_name FROM products p LEFT JOIN categories c ON p.category_id=c.id WHERE ${where} ORDER BY p.created_at DESC`,
-            params
-        );
-        res.json(products.map(p => ({ ...p, images: parseImages(p.images) })));
+        let query = {};
+        if (search) {
+            query.$or = [
+                { name: { $regex: search, $options: 'i' } },
+                { brand: { $regex: search, $options: 'i' } }
+            ];
+        }
+        const products = await Product.find(query)
+            .populate('category', 'name')
+            .sort({ createdAt: -1 });
+        res.json(products);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
@@ -82,18 +105,26 @@ router.post('/products', adminAuth, upload.array('images', 5), async (req, res) 
         if (req.files && req.files.length) {
             images = req.files.map(f => `/uploads/${f.filename}`);
         }
-        const [result] = await pool.query(
-            'INSERT INTO products (name, slug, description, specifications, price, discount_price, stock, category_id, brand, images, is_featured, is_trending, is_new_arrival, is_best_seller) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-            [name, slug, description, specifications, price, discount_price || null, stock, category_id, brand, JSON.stringify(images),
-                is_featured === 'true' ? 1 : 0, is_trending === 'true' ? 1 : 0, is_new_arrival === 'true' ? 1 : 0, is_best_seller === 'true' ? 1 : 0]
-        );
-        res.status(201).json({ message: 'Product created', id: result.insertId });
+
+        const product = new Product({
+            name, slug, description, specifications, price, brand, stock, images,
+            category: category_id || null,
+            discount_price: discount_price || null,
+            is_featured: is_featured === 'true',
+            is_trending: is_trending === 'true',
+            is_new_arrival: is_new_arrival === 'true',
+            is_best_seller: is_best_seller === 'true'
+        });
+
+        await product.save();
+        res.status(201).json({ message: 'Product created', id: product._id });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
 router.put('/products/:id', adminAuth, upload.array('images', 5), async (req, res) => {
     try {
         const { name, description, specifications, price, discount_price, stock, category_id, brand, is_featured, is_trending, is_new_arrival, is_best_seller, existing_images } = req.body;
+
         let images = [];
         if (existing_images) {
             try { images = JSON.parse(existing_images); } catch { images = []; }
@@ -101,18 +132,25 @@ router.put('/products/:id', adminAuth, upload.array('images', 5), async (req, re
         if (req.files && req.files.length) {
             images = [...images, ...req.files.map(f => `/uploads/${f.filename}`)];
         }
-        await pool.query(
-            'UPDATE products SET name=?, description=?, specifications=?, price=?, discount_price=?, stock=?, category_id=?, brand=?, images=?, is_featured=?, is_trending=?, is_new_arrival=?, is_best_seller=? WHERE id=?',
-            [name, description, specifications, price, discount_price || null, stock, category_id, brand, JSON.stringify(images),
-                is_featured === 'true' ? 1 : 0, is_trending === 'true' ? 1 : 0, is_new_arrival === 'true' ? 1 : 0, is_best_seller === 'true' ? 1 : 0, req.params.id]
-        );
+
+        const updateData = {
+            name, description, specifications, price, brand, stock, images,
+            category: category_id || null,
+            discount_price: discount_price || null,
+            is_featured: is_featured === 'true',
+            is_trending: is_trending === 'true',
+            is_new_arrival: is_new_arrival === 'true',
+            is_best_seller: is_best_seller === 'true'
+        };
+
+        await Product.findByIdAndUpdate(req.params.id, updateData);
         res.json({ message: 'Product updated' });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
 router.delete('/products/:id', adminAuth, async (req, res) => {
     try {
-        await pool.query('DELETE FROM products WHERE id=?', [req.params.id]);
+        await Product.findByIdAndDelete(req.params.id);
         res.json({ message: 'Product deleted' });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -120,8 +158,23 @@ router.delete('/products/:id', adminAuth, async (req, res) => {
 // ---- CATEGORIES ----
 router.get('/categories', adminAuth, async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT c.*, COUNT(p.id) as product_count FROM categories c LEFT JOIN products p ON p.category_id=c.id GROUP BY c.id');
-        res.json(rows);
+        const categories = await Category.aggregate([
+            {
+                $lookup: {
+                    from: 'products',
+                    localField: '_id',
+                    foreignField: 'category',
+                    as: 'products'
+                }
+            },
+            {
+                $project: {
+                    name: 1, slug: 1, description: 1, image: 1,
+                    product_count: { $size: '$products' }
+                }
+            }
+        ]);
+        res.json(categories);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
@@ -129,8 +182,9 @@ router.post('/categories', adminAuth, async (req, res) => {
     try {
         const { name, description, image } = req.body;
         const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        const [result] = await pool.query('INSERT INTO categories (name, slug, description, image) VALUES (?,?,?,?)', [name, slug, description, image]);
-        res.status(201).json({ message: 'Category created', id: result.insertId });
+        const category = new Category({ name, slug, description, image });
+        await category.save();
+        res.status(201).json({ message: 'Category created', id: category._id });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
@@ -138,14 +192,14 @@ router.put('/categories/:id', adminAuth, async (req, res) => {
     try {
         const { name, description, image } = req.body;
         const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        await pool.query('UPDATE categories SET name=?, slug=?, description=?, image=? WHERE id=?', [name, slug, description, image, req.params.id]);
+        await Category.findByIdAndUpdate(req.params.id, { name, slug, description, image });
         res.json({ message: 'Category updated' });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
 router.delete('/categories/:id', adminAuth, async (req, res) => {
     try {
-        await pool.query('DELETE FROM categories WHERE id=?', [req.params.id]);
+        await Category.findByIdAndDelete(req.params.id);
         res.json({ message: 'Category deleted' });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -154,22 +208,20 @@ router.delete('/categories/:id', adminAuth, async (req, res) => {
 router.get('/orders', adminAuth, async (req, res) => {
     try {
         const { status } = req.query;
-        let where = '1=1', params = [];
-        if (status) { where += ' AND o.status=?'; params.push(status); }
-        const [orders] = await pool.query(
-            `SELECT o.*, u.name as user_name FROM orders o LEFT JOIN users u ON o.user_id=u.id WHERE ${where} ORDER BY o.created_at DESC`,
-            params
-        );
+        let query = {};
+        if (status) query.status = status;
+        const orders = await Order.find(query)
+            .populate('user', 'name')
+            .sort({ createdAt: -1 });
         res.json(orders);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
 router.get('/orders/:id', adminAuth, async (req, res) => {
     try {
-        const [orders] = await pool.query('SELECT o.*, u.name as user_name, u.email as user_email FROM orders o LEFT JOIN users u ON o.user_id=u.id WHERE o.id=?', [req.params.id]);
-        if (!orders.length) return res.status(404).json({ message: 'Order not found' });
-        const [items] = await pool.query('SELECT * FROM order_items WHERE order_id=?', [req.params.id]);
-        res.json({ ...orders[0], items });
+        const order = await Order.findById(req.params.id).populate('user', 'name email');
+        if (!order) return res.status(404).json({ message: 'Order not found' });
+        res.json(order);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
@@ -178,7 +230,7 @@ router.put('/orders/:id/status', adminAuth, async (req, res) => {
         const { status } = req.body;
         const validStatuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled'];
         if (!validStatuses.includes(status)) return res.status(400).json({ message: 'Invalid status' });
-        await pool.query('UPDATE orders SET status=? WHERE id=?', [status, req.params.id]);
+        await Order.findByIdAndUpdate(req.params.id, { status });
         res.json({ message: 'Order status updated' });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -186,22 +238,18 @@ router.put('/orders/:id/status', adminAuth, async (req, res) => {
 // ---- USERS ----
 router.get('/users', adminAuth, async (req, res) => {
     try {
-        const [users] = await pool.query("SELECT id, name, email, phone, role, created_at FROM users WHERE role='user' ORDER BY created_at DESC");
+        const users = await User.find({ role: 'user' })
+            .select('name email phone role createdAt')
+            .sort({ createdAt: -1 });
         res.json(users);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
 router.get('/users/:id/orders', adminAuth, async (req, res) => {
     try {
-        const [orders] = await pool.query('SELECT * FROM orders WHERE user_id=? ORDER BY created_at DESC', [req.params.id]);
+        const orders = await Order.find({ user: req.params.id }).sort({ createdAt: -1 });
         res.json(orders);
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
-
-function parseImages(images) {
-    if (!images) return [];
-    if (Array.isArray(images)) return images;
-    try { return JSON.parse(images); } catch { return []; }
-}
 
 module.exports = router;
