@@ -122,9 +122,22 @@ export default function Home() {
                         <div className="loader-wrap"><div className="loader" /></div>
                     ) : (
                         <div className="product-grid">
-                            {(tabProducts[activeTab] || []).map(p => (
-                                <ProductCard key={p.id} product={p} onQuickView={setQuickView} />
-                            ))}
+                            {(tabProducts[activeTab] && tabProducts[activeTab].length > 0) ? (
+                                tabProducts[activeTab].map(p => (
+                                    <ProductCard key={p._id} product={p} onQuickView={setQuickView} />
+                                ))
+                            ) : (
+                                // Fallback to ALL products if featured/trending/etc are empty
+                                featured.all && featured.all.length > 0 ? (
+                                    featured.all.map(p => (
+                                        <ProductCard key={p._id} product={p} onQuickView={setQuickView} />
+                                    ))
+                                ) : (
+                                    <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '3rem', opacity: 0.6 }}>
+                                        No products found in this category yet.
+                                    </div>
+                                )
+                            )}
                         </div>
                     )}
                     <div style={{ textAlign: 'center', marginTop: '2.5rem' }}>

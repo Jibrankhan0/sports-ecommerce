@@ -29,7 +29,7 @@ export default function AdminProducts() {
         setEditingProduct(p);
         setForm({
             name: p.name,
-            category_id: p.category_id,
+            category_id: p.category?._id || p.category || '',
             brand: p.brand,
             price: p.price,
             discount_price: p.discount_price || '',
@@ -64,7 +64,7 @@ export default function AdminProducts() {
 
         try {
             if (editingProduct) {
-                await API.put(`/admin/products/${editingProduct.id}`, formData);
+                await API.put(`/admin/products/${editingProduct._id}`, formData);
                 toast.success('Product updated');
             } else {
                 await API.post('/admin/products', formData);
@@ -103,15 +103,15 @@ export default function AdminProducts() {
                     </thead>
                     <tbody>
                         {products.map(p => (
-                            <tr key={p.id}>
-                                <td><img src={p.images?.[0]?.startsWith('http') ? p.images[0] : `http://localhost:5000${p.images?.[0]}`} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} /></td>
+                            <tr key={p._id}>
+                                <td><img src={p.images?.[0]?.startsWith('http') ? p.images[0] : (p.images?.[0] ? `http://localhost:5000${p.images[0]}` : 'https://via.placeholder.com/40')} alt="" style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '4px' }} /></td>
                                 <td>{p.name}</td>
-                                <td>{p.category_name}</td>
+                                <td>{p.category?.name || 'Uncategorized'}</td>
                                 <td>Rs. {Number(p.price).toLocaleString()}</td>
                                 <td>{p.stock}</td>
                                 <td className="actions-cell">
                                     <button className="btn btn-ghost btn-sm" onClick={() => handleEdit(p)}>Edit</button>
-                                    <button className="btn btn-ghost btn-danger btn-sm" onClick={() => handleDelete(p.id)}>Delete</button>
+                                    <button className="btn btn-ghost btn-danger btn-sm" onClick={() => handleDelete(p._id)}>Delete</button>
                                 </td>
                             </tr>
                         ))}
@@ -132,7 +132,7 @@ export default function AdminProducts() {
                                 <label className="form-label">Category</label>
                                 <select className="form-control" value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })} required>
                                     <option value="">Select Category</option>
-                                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                    {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
                                 </select>
                             </div>
                             <div className="form-group">

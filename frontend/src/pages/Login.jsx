@@ -37,16 +37,8 @@ export default function Login() {
                         {loading ? 'Logging in...' : 'Login →'}
                     </button>
                 </form>
-                <div className="auth-divider"><span>OR</span></div>
-                <div style={{ textAlign: 'center' }}>
+                <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>Don't have an account? <Link to="/register" style={{ color: 'var(--accent)' }}>Register</Link></p>
-                </div>
-                <div className="auth-demo">
-                    <p style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '0.5rem' }}>Demo Accounts:</p>
-                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <button className="btn btn-ghost btn-sm" onClick={() => setForm({ email: 'admin@sportstore.com', password: 'admin123' })}>Admin Login</button>
-                        <button className="btn btn-ghost btn-sm" onClick={() => setForm({ email: 'john@example.com', password: 'user123' })}>User Login</button>
-                    </div>
                 </div>
             </div>
         </div>

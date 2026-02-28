@@ -80,7 +80,8 @@ router.get('/featured', async (req, res) => {
         const trending = await Product.find({ is_trending: true }).limit(8);
         const newArrivals = await Product.find({ is_new_arrival: true }).limit(8);
         const bestSellers = await Product.find({ is_best_seller: true }).limit(8);
-        res.json({ featured, trending, newArrivals, bestSellers });
+        const all = await Product.find().sort({ createdAt: -1 }).limit(8);
+        res.json({ featured, trending, newArrivals, bestSellers, all });
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

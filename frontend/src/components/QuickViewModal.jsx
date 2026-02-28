@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { IMG_BASE } from '../services/api';
 import StarRating from './StarRating';
 
-const BASE = 'http://localhost:5000';
+// Image base URL is now dynamic
 
 export default function QuickViewModal({ product, onClose }) {
     const { addToCart } = useCart();
@@ -14,15 +15,15 @@ export default function QuickViewModal({ product, onClose }) {
 
     if (!product) return null;
     const img = product.images?.[0]
-        ? (product.images[0].startsWith('http') ? product.images[0] : BASE + product.images[0])
+        ? (product.images[0].startsWith('http') ? product.images[0] : IMG_BASE + product.images[0])
         : 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=600';
 
     const effectivePrice = product.discount_price || product.price;
-    const inWl = isInWishlist(product.id);
+    const inWl = isInWishlist(product._id);
 
     const handleAdd = async () => {
         setAdding(true);
-        await addToCart(product.id, qty);
+        await addToCart(product._id, qty);
         setAdding(false);
         onClose();
     };
@@ -42,7 +43,7 @@ export default function QuickViewModal({ product, onClose }) {
                 </div>
                 <div style={{ flex: '1.2', padding: '2rem', overflowY: 'auto' }}>
                     <button onClick={onClose} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', fontSize: '1.4rem', color: 'var(--text-muted)', cursor: 'pointer' }}>✕</button>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>{product.category_name}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>{product.category?.name || product.category_name}</div>
                     <h2 style={{ fontFamily: 'Rajdhani', fontSize: '1.5rem', marginBottom: '0.5rem' }}>{product.name}</h2>
                     <div style={{ marginBottom: '0.75rem' }}><StarRating rating={product.rating} size={14} /></div>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginBottom: '1rem' }}>
@@ -65,12 +66,12 @@ export default function QuickViewModal({ product, onClose }) {
                         <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleAdd} disabled={adding || product.stock === 0}>
                             {adding ? 'Adding...' : '🛒 Add to Cart'}
                         </button>
-                        <button onClick={() => inWl ? removeFromWishlist(product.id) : addToWishlist(product.id)}
+                        <button onClick={() => inWl ? removeFromWishlist(product._id) : addToWishlist(product._id)}
                             style={{ padding: '0.75rem 1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'none', color: inWl ? '#ff5252' : 'var(--text-muted)', fontSize: '1.1rem', cursor: 'pointer', transition: 'var(--transition)' }}>
                             {inWl ? '♥' : '♡'}
                         </button>
                     </div>
-                    <Link to={`/product/${product.id}`} onClick={onClose} style={{ display: 'block', textAlign: 'center', marginTop: '1rem', fontSize: '0.85rem', color: 'var(--accent)' }}>
+                    <Link to={`/product/${product._id}`} onClick={onClose} style={{ display: 'block', textAlign: 'center', marginTop: '1rem', fontSize: '0.85rem', color: 'var(--accent)' }}>
                         View full details →
                     </Link>
                 </div>

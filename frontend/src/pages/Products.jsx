@@ -104,7 +104,7 @@ export default function Products() {
                         ) : (
                             <>
                                 <div className="product-grid">
-                                    {products.map(p => <ProductCard key={p.id} product={p} onQuickView={setQuickView} />)}
+                                    {products.map(p => <ProductCard key={p._id} product={p} onQuickView={setQuickView} />)}
                                 </div>
                                 {pages > 1 && (
                                     <div className="pagination">

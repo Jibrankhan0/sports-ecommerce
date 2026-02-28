@@ -43,7 +43,7 @@ export function CartProvider({ children }) {
     const removeFromCart = async (cartId) => {
         try {
             await API.delete(`/cart/${cartId}`);
-            setCart(prev => prev.filter(i => i.id !== cartId));
+            setCart(prev => prev.filter(i => (i.product?._id || i.product) !== cartId));
             toast.success('Removed from cart');
         } catch (err) { toast.error('Failed to remove item'); }
     };
@@ -52,7 +52,7 @@ export function CartProvider({ children }) {
         try { await API.delete('/cart'); setCart([]); } catch { }
     };
 
-    const cartTotal = cart.reduce((s, i) => s + ((i.discount_price || i.price) * i.quantity), 0);
+    const cartTotal = cart.reduce((s, i) => s + ((i.product?.discount_price || i.product?.price || 0) * i.quantity), 0);
     const cartCount = cart.reduce((s, i) => s + i.quantity, 0);
 
     return (

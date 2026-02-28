@@ -41,7 +41,7 @@ export default function AdminCategories() {
         e.preventDefault();
         try {
             if (editingCategory) {
-                await API.put(`/admin/categories/${editingCategory.id}`, form);
+                await API.put(`/admin/categories/${editingCategory._id}`, form);
                 toast.success('Category updated');
             } else {
                 await API.post('/admin/categories', form);
@@ -78,14 +78,14 @@ export default function AdminCategories() {
                     </thead>
                     <tbody>
                         {categories.map(c => (
-                            <tr key={c.id}>
-                                <td>{c.id}</td>
+                            <tr key={c._id}>
+                                <td>{c._id}</td>
                                 <td>{c.name}</td>
                                 <td>{c.slug}</td>
                                 <td>{c.product_count || 0}</td>
                                 <td className="actions-cell">
                                     <button className="btn btn-ghost btn-sm" onClick={() => handleEdit(c)}>Edit</button>
-                                    <button className="btn btn-ghost btn-danger btn-sm" onClick={() => handleDelete(c.id)}>Delete</button>
+                                    <button className="btn btn-ghost btn-danger btn-sm" onClick={() => handleDelete(c._id)}>Delete</button>
                                 </td>
                             </tr>
                         ))}

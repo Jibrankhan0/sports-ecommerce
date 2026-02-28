@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
-import API from '../services/api';
+import API, { IMG_BASE } from '../services/api';
 import toast from 'react-hot-toast';
 
-const BASE = 'http://localhost:5000';
+// Image base URL is dynamic
 
 export default function Checkout() {
     const { cart, cartTotal, clearCart } = useCart();
@@ -38,13 +38,16 @@ export default function Checkout() {
         e.preventDefault();
         setPlacing(true);
         try {
-            const items = cart.map(i => ({
-                product_id: i.product_id,
-                product_name: i.name,
-                product_image: i.images?.[0] || '',
-                price: i.discount_price || i.price,
-                quantity: i.quantity,
-            }));
+            const items = cart.map(i => {
+                const p = i.product;
+                return {
+                    product_id: p?._id || p,
+                    product_name: p?.name || 'Product',
+                    product_image: p?.images?.[0] || '',
+                    price: p?.discount_price || p?.price || 0,
+                    quantity: i.quantity,
+                };
+            });
             const { data } = await API.post('/orders', { ...form, items });
             toast.success('Order placed successfully! 🎉');
             navigate(`/order-success?order=${data.orderNumber}`);
@@ -100,16 +103,17 @@ export default function Checkout() {
                                 <h3 style={{ fontFamily: 'Rajdhani', fontSize: '1.4rem', marginBottom: '1.25rem' }}>Order Summary</h3>
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1rem' }}>
                                     {cart.map(item => {
-                                        const img = item.images?.[0] ? (item.images[0].startsWith('http') ? item.images[0] : BASE + item.images[0]) : '';
+                                        const p = item.product;
+                                        const img = p?.images?.[0] ? (p.images[0].startsWith('http') ? p.images[0] : IMG_BASE + p.images[0]) : '';
                                         return (
-                                            <div key={item.id} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+                                            <div key={item._id} style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                                                 {img && <img src={img} alt="" style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '6px' }} />}
                                                 <div style={{ flex: 1, fontSize: '0.85rem' }}>
-                                                    <div style={{ fontWeight: 600 }}>{item.name}</div>
+                                                    <div style={{ fontWeight: 600 }}>{p?.name}</div>
                                                     <div style={{ color: 'var(--text-muted)' }}>Qty: {item.quantity}</div>
                                                 </div>
                                                 <div style={{ fontFamily: 'Rajdhani', fontWeight: 700, color: 'var(--accent)' }}>
-                                                    Rs. {Number((item.discount_price || item.price) * item.quantity).toLocaleString()}
+                                                    Rs. {Number((p?.discount_price || p?.price || 0) * item.quantity).toLocaleString()}
                                                 </div>
                                             </div>
                                         );

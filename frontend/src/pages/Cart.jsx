@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
+import { IMG_BASE } from '../services/api';
 import './Cart.css';
 
-const BASE = 'http://localhost:5000';
+// Image base URL is dynamic
 
 export default function Cart() {
     const { cart, updateQuantity, removeFromCart, cartTotal, cartCount } = useCart();
@@ -28,28 +29,29 @@ export default function Cart() {
                     {/* Items */}
                     <div className="cart-items">
                         {cart.map(item => {
-                            const img = item.images?.[0]
-                                ? (item.images[0].startsWith('http') ? item.images[0] : BASE + item.images[0])
+                            const p = item.product;
+                            const img = p.images?.[0]
+                                ? (p.images[0].startsWith('http') ? p.images[0] : IMG_BASE + p.images[0])
                                 : 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=200';
-                            const price = item.discount_price || item.price;
+                            const price = p.discount_price || p.price;
                             return (
-                                <div key={item.id} className="cart-item card">
-                                    <Link to={`/product/${item.product_id}`}>
-                                        <img src={img} alt={item.name} className="cart-item-img" />
+                                <div key={item._id} className="cart-item card">
+                                    <Link to={`/product/${p._id}`}>
+                                        <img src={img} alt={p.name} className="cart-item-img" />
                                     </Link>
                                     <div className="cart-item-info">
-                                        <div className="cart-item-category">{item.category}</div>
-                                        <Link to={`/product/${item.product_id}`} className="cart-item-name">{item.name}</Link>
+                                        <div className="cart-item-category">{p.category?.name}</div>
+                                        <Link to={`/product/${p._id}`} className="cart-item-name">{p.name}</Link>
                                         <div className="cart-item-price">Rs. {Number(price).toLocaleString()}</div>
                                     </div>
                                     <div className="cart-item-controls">
                                         <div className="qty-control">
-                                            <button onClick={() => updateQuantity(item.id, item.quantity - 1)}>−</button>
+                                            <button onClick={() => updateQuantity(p._id, item.quantity - 1)}>−</button>
                                             <span>{item.quantity}</span>
-                                            <button onClick={() => updateQuantity(item.id, item.quantity + 1)} disabled={item.quantity >= item.stock}>+</button>
+                                            <button onClick={() => updateQuantity(p._id, item.quantity + 1)} disabled={item.quantity >= p.stock}>+</button>
                                         </div>
                                         <div className="cart-item-subtotal">Rs. {Number(price * item.quantity).toLocaleString()}</div>
-                                        <button className="cart-remove-btn" onClick={() => removeFromCart(item.id)} title="Remove">✕</button>
+                                        <button className="cart-remove-btn" onClick={() => removeFromCart(p._id)} title="Remove">✕</button>
                                     </div>
                                 </div>
                             );

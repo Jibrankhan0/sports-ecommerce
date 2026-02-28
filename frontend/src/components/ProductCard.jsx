@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
+import { IMG_BASE } from '../services/api';
 import StarRating from './StarRating';
 import './ProductCard.css';
 
-const BASE = 'http://localhost:5000';
+// Image base URL is imported from API service
 
 export default function ProductCard({ product, onQuickView }) {
     const { addToCart } = useCart();
@@ -14,31 +15,31 @@ export default function ProductCard({ product, onQuickView }) {
     const [adding, setAdding] = useState(false);
 
     const img = product.images?.[0]
-        ? (product.images[0].startsWith('http') ? product.images[0] : BASE + product.images[0])
+        ? (product.images[0].startsWith('http') ? product.images[0] : IMG_BASE + product.images[0])
         : 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=400';
 
     const effectivePrice = product.discount_price || product.price;
     const hasDiscount = product.discount_price && product.discount_price < product.price;
     const discountPct = hasDiscount ? Math.round((1 - product.discount_price / product.price) * 100) : 0;
-    const inWl = isInWishlist(product.id);
+    const inWl = isInWishlist(product._id);
 
     const handleAddToCart = async (e) => {
         e.preventDefault();
         e.stopPropagation();
         setAdding(true);
-        await addToCart(product.id, 1);
+        await addToCart(product._id, 1);
         setAdding(false);
     };
 
     const handleWishlist = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        inWl ? removeFromWishlist(product.id) : addToWishlist(product.id);
+        inWl ? removeFromWishlist(product._id) : addToWishlist(product._id);
     };
 
     return (
         <div className="product-card animate-fade">
-            <Link to={`/product/${product.id}`} className="card-image-wrap">
+            <Link to={`/product/${product._id}`} className="card-image-wrap">
                 <img src={img} alt={product.name} className="card-img" loading="lazy" />
                 {hasDiscount && <span className="card-discount-badge">{discountPct}% OFF</span>}
                 {product.stock === 0 && <div className="card-out-of-stock">Out of Stock</div>}
@@ -49,8 +50,8 @@ export default function ProductCard({ product, onQuickView }) {
                 </div>
             </Link>
             <div className="card-body">
-                <div className="card-category">{product.category_name}</div>
-                <Link to={`/product/${product.id}`} className="card-title">{product.name}</Link>
+                <div className="card-category">{product.category?.name || product.category_name}</div>
+                <Link to={`/product/${product._id}`} className="card-title">{product.name}</Link>
                 <div className="card-brand">{product.brand}</div>
                 <div className="card-rating">
                     <StarRating rating={product.rating} size={12} />

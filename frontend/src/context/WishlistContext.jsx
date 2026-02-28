@@ -27,12 +27,12 @@ export function WishlistProvider({ children }) {
     const removeFromWishlist = async (product_id) => {
         try {
             await API.delete(`/wishlist/${product_id}`);
-            setWishlist(prev => prev.filter(i => i.product_id !== product_id));
+            setWishlist(prev => prev.filter(i => i._id !== product_id));
             toast.success('Removed from wishlist');
         } catch { }
     };
 
-    const isInWishlist = (product_id) => wishlist.some(i => i.product_id === product_id);
+    const isInWishlist = (product_id) => wishlist.some(i => i._id === product_id);
 
     return (
         <WishlistContext.Provider value={{ wishlist, addToWishlist, removeFromWishlist, isInWishlist, fetchWishlist }}>

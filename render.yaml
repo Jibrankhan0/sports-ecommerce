@@ -37,4 +37,5 @@ services:
         fromService:
           type: web
           name: sports-ecommerce-backend
-          property: host
+          property: url
+        # Note: We will manually add /api in the code or via the Render dashboard if needed

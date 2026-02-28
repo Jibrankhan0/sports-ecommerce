@@ -100,6 +100,11 @@ router.get('/products', adminAuth, async (req, res) => {
 router.post('/products', adminAuth, upload.array('images', 5), async (req, res) => {
     try {
         const { name, description, specifications, price, discount_price, stock, category_id, brand, is_featured, is_trending, is_new_arrival, is_best_seller } = req.body;
+
+        if (!name || !price) {
+            return res.status(400).json({ message: 'Name and Price are required' });
+        }
+
         const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
         let images = [];
         if (req.files && req.files.length) {
@@ -107,8 +112,8 @@ router.post('/products', adminAuth, upload.array('images', 5), async (req, res) 
         }
 
         const product = new Product({
-            name, slug, description, specifications, price, brand, stock, images,
-            category: category_id || null,
+            name, slug, description, specifications, price, brand: brand || 'Generic', stock: stock || 0, images,
+            category: (category_id && category_id !== 'undefined') ? category_id : null,
             discount_price: discount_price || null,
             is_featured: is_featured === 'true',
             is_trending: is_trending === 'true',
@@ -181,6 +186,7 @@ router.get('/categories', adminAuth, async (req, res) => {
 router.post('/categories', adminAuth, async (req, res) => {
     try {
         const { name, description, image } = req.body;
+        if (!name) return res.status(400).json({ message: 'Name is required' });
         const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
         const category = new Category({ name, slug, description, image });
         await category.save();

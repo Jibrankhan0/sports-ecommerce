@@ -32,7 +32,7 @@ export default function Orders() {
                 ) : (
                     <div className="orders-list">
                         {orders.map(order => (
-                            <div key={order.id} className="card order-card">
+                            <div key={order._id} className="card order-card">
                                 <div className="order-header">
                                     <div>
                                         <span className="order-number">#{order.order_number}</span>
@@ -44,7 +44,7 @@ export default function Orders() {
                                 </div>
                                 <div className="order-items">
                                     {order.items.map(item => (
-                                        <div key={item.id} className="order-item">
+                                        <div key={item._id} className="order-item">
                                             <img src={item.product_image?.startsWith('http') ? item.product_image : `http://localhost:5000${item.product_image}`} alt={item.product_name} />
                                             <div className="item-details">
                                                 <div className="item-name">{item.product_name}</div>

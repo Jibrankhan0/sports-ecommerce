@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import API from '../services/api';
+import API, { IMG_BASE } from '../services/api';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
@@ -10,7 +10,7 @@ import toast from 'react-hot-toast';
 import ImageZoom from '../components/ImageZoom';
 import './ProductDetail.css';
 
-const BASE = 'http://localhost:5000';
+// Image base URL is now dynamic
 
 export default function ProductDetail() {
     const { id } = useParams();
@@ -44,14 +44,14 @@ export default function ProductDetail() {
         // Track recently viewed
         try {
             const viewed = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-            const filtered = viewed.filter(v => v !== parseInt(id));
-            localStorage.setItem('recentlyViewed', JSON.stringify([parseInt(id), ...filtered].slice(0, 10)));
+            const filtered = viewed.filter(v => v !== id);
+            localStorage.setItem('recentlyViewed', JSON.stringify([id, ...filtered].slice(0, 10)));
         } catch { }
     }, [id]);
 
     const handleAddToCart = async () => {
         setAdding(true);
-        await addToCart(product.id, qty);
+        await addToCart(product._id, qty);
         setAdding(false);
     };
 
@@ -74,10 +74,10 @@ export default function ProductDetail() {
     if (!product) return null;
 
     const images = product.images?.length ? product.images : ['https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=800'];
-    const getImg = (src) => src.startsWith('http') ? src : BASE + src;
+    const getImg = (src) => src.startsWith('http') ? src : IMG_BASE + src;
     const effectivePrice = product.discount_price || product.price;
     const hasDiscount = product.discount_price && product.discount_price < product.price;
-    const inWl = isInWishlist(product.id);
+    const inWl = isInWishlist(product._id);
 
     return (
         <div style={{ paddingTop: '90px' }}>
@@ -85,7 +85,7 @@ export default function ProductDetail() {
                 {/* Breadcrumb */}
                 <div className="breadcrumb">
                     <Link to="/">Home</Link> / <Link to="/products">Shop</Link> /
-                    <Link to={`/products?category=${product.category_slug}`}>{product.category_name}</Link> /
+                    <Link to={`/products?category=${product.category?.slug}`}>{product.category?.name || product.category_name}</Link> /
                     <span>{product.name}</span>
                 </div>
 
@@ -114,7 +114,7 @@ export default function ProductDetail() {
 
                     {/* Info */}
                     <div className="pd-info">
-                        <div className="pd-category">{product.category_name}</div>
+                        <div className="pd-category">{product.category?.name || product.category_name}</div>
                         <h1 className="pd-title">{product.name}</h1>
                         <div className="pd-brand">By <span style={{ color: 'var(--accent)' }}>{product.brand}</span></div>
 
@@ -168,7 +168,7 @@ export default function ProductDetail() {
                             <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleAddToCart} disabled={adding || product.stock === 0}>
                                 {adding ? 'Adding...' : '🛒 Add to Cart'}
                             </button>
-                            <button className={`wishlist-toggle-btn ${inWl ? 'active' : ''}`} onClick={() => inWl ? removeFromWishlist(product.id) : addToWishlist(product.id)}>
+                            <button className={`wishlist-toggle-btn ${inWl ? 'active' : ''}`} onClick={() => inWl ? removeFromWishlist(product._id) : addToWishlist(product._id)}>
                                 {inWl ? '♥' : '♡'}
                             </button>
                         </div>
@@ -183,7 +183,7 @@ export default function ProductDetail() {
                     <section style={{ marginTop: '4rem' }}>
                         <h2 className="section-title" style={{ fontSize: '2rem', marginBottom: '1.5rem' }}>Related Products</h2>
                         <div className="product-grid">
-                            {related.map(p => <ProductCard key={p.id} product={p} />)}
+                            {related.map(p => <ProductCard key={p._id} product={p} />)}
                         </div>
                     </section>
                 )}
@@ -218,9 +218,11 @@ export default function ProductDetail() {
                             <form onSubmit={handleReview} style={{ opacity: user ? 1 : 0.5, pointerEvents: user ? 'all' : 'none' }}>
                                 <div className="form-group">
                                     <label className="form-label">Your Rating</label>
-                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                        <button type="button" key={s} onClick={() => setReviewForm(f => ({ ...f, rating: s }))}
-                                            style={{ fontSize: '1.5rem', color: s <= reviewForm.rating ? 'var(--warning)' : 'var(--text-dim)', background: 'none', cursor: 'pointer' }}>★</button>
+                                    <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                        {[1, 2, 3, 4, 5].map(s => (
+                                            <button type="button" key={s} onClick={() => setReviewForm(f => ({ ...f, rating: s }))}
+                                                style={{ fontSize: '1.5rem', color: s <= reviewForm.rating ? '#ffc107' : 'var(--text-dim)', background: 'none', cursor: 'pointer', padding: 0 }}>★</button>
+                                        ))}
                                     </div>
                                 </div>
                                 <div className="form-group">

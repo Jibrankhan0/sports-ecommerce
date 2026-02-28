@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const IMG_BASE = API_BASE.replace('/api', '');
+
 const API = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api'
+    baseURL: API_BASE
 });
 
 API.interceptors.request.use(config => {
@@ -21,4 +24,5 @@ API.interceptors.response.use(
     }
 );
 
+export { IMG_BASE };
 export default API;

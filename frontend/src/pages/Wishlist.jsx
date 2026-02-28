@@ -14,19 +14,10 @@ export default function Wishlist() {
                     </div>
                 ) : (
                     <div className="product-grid">
-                        {wishlist.map(item => (
+                        {wishlist.map(p => (
                             <ProductCard
-                                key={item.product_id}
-                                product={{
-                                    id: item.product_id,
-                                    name: item.name,
-                                    price: item.price,
-                                    discount_price: item.discount_price,
-                                    images: item.images,
-                                    rating: item.rating,
-                                    stock: item.stock,
-                                    category_name: item.category
-                                }}
+                                key={p._id}
+                                product={p}
                             />
                         ))}
                     </div>
