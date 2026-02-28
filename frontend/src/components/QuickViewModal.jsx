@@ -4,8 +4,7 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { IMG_BASE } from '../services/api';
 import StarRating from './StarRating';
-
-// Image base URL is now dynamic
+import './QuickViewModal.css';
 
 export default function QuickViewModal({ product, onClose }) {
     const { addToCart } = useCart();
@@ -37,32 +36,34 @@ export default function QuickViewModal({ product, onClose }) {
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal-box" onClick={e => e.stopPropagation()} style={{ display: 'flex', gap: '0', overflow: 'hidden', maxWidth: '780px', width: '90%' }}>
-                <div style={{ flex: '1', background: 'var(--bg-card2)' }}>
-                    <img src={img} alt={product.name} style={{ width: '100%', height: '360px', objectFit: 'cover' }} />
+            <div className="modal-box" onClick={e => e.stopPropagation()}>
+                <div className="modal-image-col">
+                    <img src={img} alt={product.name} />
                 </div>
-                <div style={{ flex: '1.2', padding: '2rem', overflowY: 'auto' }}>
-                    <button onClick={onClose} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'none', fontSize: '1.4rem', color: 'var(--text-muted)', cursor: 'pointer' }}>✕</button>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--accent)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '0.5rem' }}>{product.category?.name || product.category_name}</div>
-                    <h2 style={{ fontFamily: 'Rajdhani', fontSize: '1.5rem', marginBottom: '0.5rem' }}>{product.name}</h2>
+                <div className="modal-info-col">
+                    <button className="modal-close-btn" onClick={onClose}>✕</button>
+                    <div className="modal-category">{product.category?.name || product.category_name}</div>
+                    <h2 className="modal-title">{product.name}</h2>
                     <div style={{ marginBottom: '0.75rem' }}><StarRating rating={product.rating} size={14} /></div>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.75rem', marginBottom: '1rem' }}>
-                        <span style={{ fontFamily: 'Rajdhani', fontSize: '1.8rem', fontWeight: 700, color: 'var(--accent)' }}>Rs. {Number(effectivePrice).toLocaleString()}</span>
-                        {product.discount_price && <span style={{ color: 'var(--text-dim)', textDecoration: 'line-through', fontSize: '1rem' }}>Rs. {Number(product.price).toLocaleString()}</span>}
+                    <div className="modal-price-wrap">
+                        <span className="modal-price">Rs. {Number(effectivePrice).toLocaleString()}</span>
+                        {product.discount_price && <span className="modal-old-price">Rs. {Number(product.price).toLocaleString()}</span>}
                     </div>
-                    <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.7', marginBottom: '1.25rem' }}>{product.description?.slice(0, 200)}...</p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.25rem' }}>
+                    <p className="modal-description">{product.description?.slice(0, 200)}...</p>
+
+                    <div className="modal-qty-wrap">
                         <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Qty:</span>
-                        <div style={{ display: 'flex', alignItems: 'center', border: '1px solid var(--border)', borderRadius: '8px', overflow: 'hidden' }}>
-                            <button onClick={() => setQty(q => Math.max(1, q - 1))} style={{ padding: '0.4rem 0.75rem', background: 'none', color: 'var(--text)', fontSize: '1rem', cursor: 'pointer' }}>−</button>
-                            <span style={{ padding: '0.4rem 1rem', borderLeft: '1px solid var(--border)', borderRight: '1px solid var(--border)' }}>{qty}</span>
-                            <button onClick={() => setQty(q => Math.min(product.stock, q + 1))} style={{ padding: '0.4rem 0.75rem', background: 'none', color: 'var(--text)', fontSize: '1rem', cursor: 'pointer' }}>+</button>
+                        <div className="qty-control">
+                            <button className="qty-btn" onClick={() => setQty(q => Math.max(1, q - 1))}>−</button>
+                            <span className="qty-val">{qty}</span>
+                            <button className="qty-btn" onClick={() => setQty(q => Math.min(product.stock, q + 1))}>+</button>
                         </div>
-                        <span style={{ fontSize: '0.8rem', color: product.stock > 0 ? 'var(--success)' : 'var(--danger)' }}>
+                        <span className={`modal-stock ${product.stock > 0 ? 'text-success' : 'text-danger'}`}>
                             {product.stock > 0 ? `${product.stock} in stock` : 'Out of stock'}
                         </span>
                     </div>
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+
+                    <div className="modal-actions">
                         <button className="btn btn-primary" style={{ flex: 1 }} onClick={handleAdd} disabled={adding || product.stock === 0}>
                             {adding ? 'Adding...' : '🛒 Add to Cart'}
                         </button>
@@ -71,7 +72,8 @@ export default function QuickViewModal({ product, onClose }) {
                             {inWl ? '♥' : '♡'}
                         </button>
                     </div>
-                    <Link to={`/product/${product._id}`} onClick={onClose} style={{ display: 'block', textAlign: 'center', marginTop: '1rem', fontSize: '0.85rem', color: 'var(--accent)' }}>
+
+                    <Link to={`/product/${product._id}`} onClick={onClose} className="view-details-link" style={{ display: 'block', textAlign: 'center', marginTop: '1.5rem', fontSize: '0.88rem', color: 'var(--accent)', fontWeight: 600 }}>
                         View full details →
                     </Link>
                 </div>

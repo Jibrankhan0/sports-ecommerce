@@ -36,8 +36,8 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
-                <div className="card" style={{ padding: '1.5rem' }}>
+            <div className="dashboard-charts-grid">
+                <div className="card dashboard-card">
                     <h3 style={{ marginBottom: '1.5rem', fontFamily: 'Rajdhani' }}>Monthly Revenue</h3>
                     <div style={{ height: '300px' }}>
                         <ResponsiveContainer width="100%" height="100%">

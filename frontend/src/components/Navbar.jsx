@@ -90,6 +90,7 @@ export default function Navbar() {
                 </Link>
 
                 {/* Nav Links */}
+                {menuOpen && <div className="navbar-overlay" onClick={() => setMenuOpen(false)} />}
                 <div className={`navbar-links ${menuOpen ? 'open' : ''}`}>
                     <Link to="/" className="nav-link" onClick={() => setMenuOpen(false)}>Home</Link>
                     <div className="nav-dropdown" onMouseEnter={openMega} onMouseLeave={closeMega}>
@@ -152,9 +153,6 @@ export default function Navbar() {
                     <button className="nav-icon-btn search-mobile-btn" onClick={() => navigate('/products')}>
                         🔍
                     </button>
-                    <Link to="/wishlist" className="nav-icon-btn" title="Wishlist">
-                        ♡<span className="icon-badge">{wishlist.length || ''}</span>
-                    </Link>
                     <Link to="/cart" className="nav-icon-btn cart-btn" title="Cart">
                         🛒<span className="icon-badge">{cartCount || ''}</span>
                     </Link>

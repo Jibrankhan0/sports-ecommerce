@@ -350,6 +350,14 @@
     justify-content: center;
 }
 
+.navbar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+}
+
 .login-icon {
     display: none;
 }
@@ -378,31 +386,62 @@
     }
 
     .navbar-links {
-        display: none;
+        display: flex;
         position: fixed;
-        top: 70px;
+        top: 0;
         left: 0;
-        right: 0;
         bottom: 0;
-        background: var(--bg-dark);
+        width: 280px;
+        background: var(--bg-card);
         flex-direction: column;
-        align-items: flex-start;
-        padding: 2rem;
-        gap: 0.5rem;
-        overflow-y: auto;
+        align-items: stretch;
+        padding: 2rem 1.5rem;
+        gap: 1rem;
+        z-index: 1001;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-right: 1px solid var(--border);
     }
 
     .navbar-links.open {
-        display: flex;
-        animation: slideIn 0.3s ease;
+        transform: translateX(0);
+    }
+
+    .nav-link {
+        font-size: 1.1rem;
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid var(--border);
+        border-radius: 0;
     }
 
     .mega-menu {
         position: static;
+        background: var(--bg-card2);
+        border-bottom: none;
+        box-shadow: none;
+        margin-top: 0.5rem;
+        padding: 0;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .mega-menu-inner {
+        padding: 0.5rem;
     }
 
     .mega-grid {
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: 1fr 1fr;
+        gap: 0.25rem;
+    }
+
+    .mega-item {
+        padding: 0.75rem 0.5rem;
+        flex-direction: row;
+        font-size: 0.8rem;
+    }
+
+    .mega-icon {
+        font-size: 1.2rem;
     }
 
     .hamburger {
