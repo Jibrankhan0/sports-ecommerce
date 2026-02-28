@@ -150,21 +150,25 @@
 .admin-table {
     width: 100%;
     border-collapse: collapse;
-}
-
-.admin-table th,
-.admin-table td {
-    padding: 1rem 1.5rem;
-    text-align: left;
-    border-bottom: 1px solid var(--border);
+    font-size: 0.9rem;
 }
 
 .admin-table th {
     background: var(--bg-card2);
-    color: var(--text-muted);
-    font-size: 0.8rem;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-dim);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--border);
+}
+
+.admin-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
 }
 
 .admin-table tr:hover {
@@ -279,5 +283,52 @@
 
     .admin-header h2 {
         font-size: 1.1rem;
+    }
+}
+
+.responsive-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.span-2 {
+    grid-column: span 2;
+}
+
+@media (max-width: 768px) {
+    .responsive-form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .span-2 {
+        grid-column: span 1;
+    }
+
+    .admin-table {
+        font-size: 0.8rem;
+    }
+
+    .admin-table th,
+    .admin-table td {
+        padding: 0.75rem 0.5rem;
+    }
+
+    .admin-header h3 {
+        font-size: 1.1rem;
+    }
+
+    .modal-box {
+        padding: 1.25rem !important;
+    }
+
+    .modal-box h3 {
+        font-size: 1.2rem;
+    }
+
+    .btn-sm {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.75rem;
     }
 }

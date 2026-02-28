@@ -46,7 +46,7 @@ export default function AdminOrders() {
 
     return (
         <div className="admin-orders">
-            <div style={{ marginBottom: '2rem' }}>
+            <div style={{ marginBottom: '1.5rem' }}>
                 <h3>Manage Orders</h3>
             </div>
 
@@ -67,8 +67,8 @@ export default function AdminOrders() {
                             <tr key={o.id}>
                                 <td><strong>#{o.order_number}</strong></td>
                                 <td>
-                                    <div>{o.customer_name}</div>
-                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>{o.customer_email}</div>
+                                    <div style={{ fontWeight: 600 }}>{o.customer_name}</div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>{o.customer_email}</div>
                                 </td>
                                 <td>Rs. {Number(o.total).toLocaleString()}</td>
                                 <td>
@@ -78,14 +78,16 @@ export default function AdminOrders() {
                                 </td>
                                 <td>{new Date(o.created_at).toLocaleDateString()}</td>
                                 <td className="actions-cell">
-                                    <button className="btn btn-ghost btn-sm" onClick={() => viewOrder(o)}>View</button>
-                                    <select className="form-control btn-sm" style={{ width: 'auto', padding: '0.2rem' }} value={o.status} onChange={(e) => handleStatusUpdate(o.id, e.target.value)}>
-                                        <option value="pending">Pending</option>
-                                        <option value="processing">Processing</option>
-                                        <option value="shipped">Shipped</option>
-                                        <option value="delivered">Delivered</option>
-                                        <option value="cancelled">Cancelled</option>
-                                    </select>
+                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                        <button className="btn btn-ghost btn-sm" onClick={() => viewOrder(o)}>View</button>
+                                        <select className="form-control btn-sm" style={{ width: 'auto', padding: '0.2rem' }} value={o.status} onChange={(e) => handleStatusUpdate(o.id, e.target.value)}>
+                                            <option value="pending">P</option>
+                                            <option value="proc">Pr</option>
+                                            <option value="ship">Sh</option>
+                                            <option value="del">De</option>
+                                            <option value="can">Ca</option>
+                                        </select>
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -95,60 +97,60 @@ export default function AdminOrders() {
 
             {showModal && selectedOrder && (
                 <div className="modal-overlay">
-                    <div className="modal-box" style={{ maxWidth: '800px', width: '90%', padding: '2rem', overflowY: 'auto' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h3>Order Details: #{selectedOrder.order_number}</h3>
+                    <div className="modal-box" style={{ maxWidth: '800px', width: '95%' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+                            <h3 className="modal-title">Order Info: #{selectedOrder.order_number}</h3>
                             <button className="btn btn-ghost" onClick={() => setShowModal(false)}>✕</button>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
-                            <div>
-                                <h4 style={{ marginBottom: '0.75rem', color: 'var(--accent)' }}>Customer Info</h4>
-                                <p><strong>Name:</strong> {selectedOrder.customer_name}</p>
-                                <p><strong>Email:</strong> {selectedOrder.customer_email}</p>
-                                <p><strong>Phone:</strong> {selectedOrder.customer_phone}</p>
+                        <div className="responsive-form-grid">
+                            <div className="card" style={{ padding: '1rem' }}>
+                                <h4 style={{ marginBottom: '0.75rem', color: 'var(--accent)', fontSize: '1rem' }}>Customer</h4>
+                                <p style={{ fontSize: '0.85rem' }}><strong>Name:</strong> {selectedOrder.customer_name}</p>
+                                <p style={{ fontSize: '0.85rem' }}><strong>Email:</strong> {selectedOrder.customer_email}</p>
+                                <p style={{ fontSize: '0.85rem' }}><strong>Phone:</strong> {selectedOrder.customer_phone}</p>
                             </div>
-                            <div>
-                                <h4 style={{ marginBottom: '0.75rem', color: 'var(--accent)' }}>Shipping Info</h4>
-                                <p><strong>Address:</strong> {selectedOrder.shipping_address}</p>
-                                <p><strong>City:</strong> {selectedOrder.city}</p>
-                                <p><strong>Status:</strong> {selectedOrder.status.toUpperCase()}</p>
+                            <div className="card" style={{ padding: '1rem' }}>
+                                <h4 style={{ marginBottom: '0.75rem', color: 'var(--accent)', fontSize: '1rem' }}>Shipping</h4>
+                                <p style={{ fontSize: '0.85rem' }}><strong>Address:</strong> {selectedOrder.shipping_address}</p>
+                                <p style={{ fontSize: '0.85rem' }}><strong>City:</strong> {selectedOrder.city}</p>
+                                <p style={{ fontSize: '0.85rem' }}><strong>Status:</strong> {selectedOrder.status.toUpperCase()}</p>
                             </div>
                         </div>
 
-                        <h4 style={{ marginBottom: '1rem' }}>Order Items</h4>
-                        <div className="admin-table-container">
-                            <table className="admin-table">
-                                <thead>
-                                    <tr>
-                                        <th>Product</th>
-                                        <th>Price</th>
-                                        <th>Qty</th>
-                                        <th>Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {selectedOrder.items.map(item => (
-                                        <tr key={item.id}>
-                                            <td>{item.product_name}</td>
-                                            <td>Rs. {Number(item.price).toLocaleString()}</td>
-                                            <td>{item.quantity}</td>
-                                            <td>Rs. {Number(item.price * item.quantity).toLocaleString()}</td>
+                        <div style={{ marginTop: '1.5rem' }}>
+                            <h4 style={{ marginBottom: '0.75rem', fontSize: '1rem' }}>Items</h4>
+                            <div className="admin-table-container">
+                                <table className="admin-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Product</th>
+                                            <th>Qty</th>
+                                            <th>Total</th>
                                         </tr>
-                                    ))}
-                                    <tr>
-                                        <td colSpan="3" style={{ textAlign: 'right' }}><strong>Total</strong></td>
-                                        <td style={{ color: 'var(--accent)', fontWeight: 'bold' }}>Rs. {Number(selectedOrder.total).toLocaleString()}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {selectedOrder.items.map(item => (
+                                            <tr key={item.id}>
+                                                <td>{item.product_name}</td>
+                                                <td>{item.quantity}</td>
+                                                <td>Rs. {Number(item.price * item.quantity).toLocaleString()}</td>
+                                            </tr>
+                                        ))}
+                                        <tr>
+                                            <td colSpan="2" style={{ textAlign: 'right' }}><strong>Total</strong></td>
+                                            <td style={{ color: 'var(--accent)', fontWeight: 'bold' }}>Rs. {Number(selectedOrder.total).toLocaleString()}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
 
-                        <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'flex-end', gap: '1rem' }}>
+                        <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
                             {selectedOrder.status !== 'delivered' && selectedOrder.status !== 'cancelled' && (
                                 <>
-                                    <button className="btn btn-primary" onClick={() => handleStatusUpdate(selectedOrder.id, 'delivered')}>Mark as Delivered</button>
-                                    <button className="btn btn-ghost btn-danger" onClick={() => handleStatusUpdate(selectedOrder.id, 'cancelled')}>Cancel Order</button>
+                                    <button className="btn btn-primary btn-sm" onClick={() => handleStatusUpdate(selectedOrder.id, 'delivered')}>Deliver</button>
+                                    <button className="btn btn-ghost btn-danger btn-sm" onClick={() => handleStatusUpdate(selectedOrder.id, 'cancelled')}>Cancel</button>
                                 </>
                             )}
                         </div>

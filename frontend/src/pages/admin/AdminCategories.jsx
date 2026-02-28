@@ -60,9 +60,9 @@ export default function AdminCategories() {
 
     return (
         <div className="admin-categories">
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.5rem', alignItems: 'center' }}>
                 <h3>Categories</h3>
-                <button className="btn btn-primary" onClick={() => { setEditingCategory(null); setShowModal(true); }}>+ Add Category</button>
+                <button className="btn btn-primary btn-sm" onClick={() => { setEditingCategory(null); setShowModal(true); }}>+ Add Category</button>
             </div>
 
             <div className="admin-table-container">
@@ -72,15 +72,15 @@ export default function AdminCategories() {
                             <th>ID</th>
                             <th>Name</th>
                             <th>Slug</th>
-                            <th>Products Count</th>
+                            <th>Products</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {categories.map(c => (
                             <tr key={c._id}>
-                                <td>{c._id}</td>
-                                <td>{c.name}</td>
+                                <td>{c._id.slice(-6)}</td>
+                                <td style={{ fontWeight: 600 }}>{c.name}</td>
                                 <td>{c.slug}</td>
                                 <td>{c.product_count || 0}</td>
                                 <td className="actions-cell">
@@ -95,9 +95,9 @@ export default function AdminCategories() {
 
             {showModal && (
                 <div className="modal-overlay">
-                    <div className="modal-box" style={{ maxWidth: '500px', width: '90%', padding: '2rem' }}>
-                        <h3>{editingCategory ? 'Edit Category' : 'Add New Category'}</h3>
-                        <form onSubmit={handleSubmit} style={{ marginTop: '1.5rem' }}>
+                    <div className="modal-box" style={{ maxWidth: '500px', width: '90%' }}>
+                        <h3 className="modal-title">{editingCategory ? 'Edit Category' : 'Add New Category'}</h3>
+                        <form onSubmit={handleSubmit} style={{ marginTop: '1rem' }}>
                             <div className="form-group">
                                 <label className="form-label">Category Name</label>
                                 <input className="form-control" value={form.name} onChange={e => setForm({ ...form, name: e.target.value, slug: e.target.value.toLowerCase().replace(/ /g, '-') })} required />
@@ -107,14 +107,14 @@ export default function AdminCategories() {
                                 <input className="form-control" value={form.slug} onChange={e => setForm({ ...form, slug: e.target.value })} required />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">Description (Optional)</label>
+                                <label className="form-label">Description</label>
                                 <textarea className="form-control" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} rows={2} />
                             </div>
                             <div className="form-group">
-                                <label className="form-label">Image URL (Optional)</label>
+                                <label className="form-label">Image URL</label>
                                 <input className="form-control" value={form.image} onChange={e => setForm({ ...form, image: e.target.value })} />
                             </div>
-                            <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
+                            <div className="modal-actions" style={{ display: 'flex', gap: '1rem', marginTop: '1.25rem' }}>
                                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>{editingCategory ? 'Update' : 'Create'}</button>
                                 <button type="button" className="btn btn-ghost" style={{ flex: 1 }} onClick={() => setShowModal(false)}>Cancel</button>
                             </div>

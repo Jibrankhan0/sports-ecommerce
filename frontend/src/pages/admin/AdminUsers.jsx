@@ -30,7 +30,7 @@ export default function AdminUsers() {
 
     return (
         <div className="admin-users">
-            <div style={{ marginBottom: '2rem' }}>
+            <div style={{ marginBottom: '1.5rem' }}>
                 <h3>User Management</h3>
             </div>
 
@@ -42,30 +42,30 @@ export default function AdminUsers() {
                             <th>Name</th>
                             <th>Email</th>
                             <th>Role</th>
-                            <th>Joined Date</th>
+                            <th>Joined</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {users.map(u => (
                             <tr key={u.id}>
-                                <td>{u.id}</td>
-                                <td style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                    {u.avatar ? <img src={u.avatar} alt="" style={{ width: '32px', height: '32px', borderRadius: '50%' }} /> : <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--accent-gradient)', display: 'flex', alignItems: 'center', justifyCenter: 'center', color: '#000', fontWeight: 'bold' }}>{u.name[0]}</div>}
-                                    {u.name}
+                                <td>{String(u.id).slice(-4)}</td>
+                                <td style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                                    {u.avatar ? <img src={u.avatar} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%' }} /> : <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: '#000', fontWeight: 'bold' }}>{u.name[0]}</div>}
+                                    <span style={{ fontWeight: 600 }}>{u.name}</span>
                                 </td>
                                 <td>{u.email}</td>
                                 <td>
-                                    <span className={`badge badge-${u.role === 'admin' ? 'danger' : 'success'}`}>
+                                    <span className={`badge badge-${u.role === 'admin' ? 'danger' : 'success'}`} style={{ fontSize: '0.7rem' }}>
                                         {u.role.toUpperCase()}
                                     </span>
                                 </td>
                                 <td>{new Date(u.created_at).toLocaleDateString()}</td>
                                 <td className="actions-cell">
                                     {u.role === 'user' ? (
-                                        <button className="btn btn-ghost btn-sm" onClick={() => handleRoleUpdate(u.id, 'admin')}>Make Admin</button>
+                                        <button className="btn btn-ghost btn-sm" onClick={() => handleRoleUpdate(u.id, 'admin')}>Promote</button>
                                     ) : (
-                                        <button className="btn btn-ghost btn-danger btn-sm" onClick={() => handleRoleUpdate(u.id, 'user')}>Remove Admin</button>
+                                        <button className="btn btn-ghost btn-danger btn-sm" onClick={() => handleRoleUpdate(u.id, 'user')}>Demote</button>
                                     )}
                                 </td>
                             </tr>
