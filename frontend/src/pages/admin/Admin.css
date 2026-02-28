@@ -193,13 +193,8 @@
 
 .actions-cell {
     display: flex;
-    flex-direction: column;
     gap: 0.5rem;
     align-items: center;
-}
-
-.actions-cell .btn {
-    width: 100%;
 }
 
 @media (max-width: 900px) {
