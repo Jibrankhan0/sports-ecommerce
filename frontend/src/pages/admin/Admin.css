@@ -61,7 +61,7 @@
     border-top: 1px solid var(--border);
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
 .admin-main {
@@ -149,7 +149,7 @@
     font-size: 1.75rem;
     font-family: 'Rajdhani', sans-serif;
     font-weight: 700;
-    line-height: 1.2;
+    line-height: 1;
 }
 
 .admin-table-container {
@@ -185,7 +185,6 @@
     color: var(--text);
     word-break: break-word;
     min-width: 80px;
-    vertical-align: middle;
 }
 
 .admin-table tr:hover {
@@ -194,8 +193,13 @@
 
 .actions-cell {
     display: flex;
+    flex-direction: column;
     gap: 0.5rem;
     align-items: center;
+}
+
+.actions-cell .btn {
+    width: 100%;
 }
 
 @media (max-width: 900px) {
@@ -209,8 +213,8 @@
     }
 
     .admin-sidebar .admin-nav a {
-        justify-content: center;
-        padding: 0.85rem 0.5rem;
+        text-align: center;
+        padding: 0.85rem 0;
     }
 
     .admin-sidebar .nav-icon {
@@ -282,9 +286,6 @@
 
     .admin-content {
         padding: 0.75rem;
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
     }
 
     .dashboard-charts-grid {
