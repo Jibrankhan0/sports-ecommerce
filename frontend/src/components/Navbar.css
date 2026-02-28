@@ -258,18 +258,19 @@
 
 .icon-badge {
     position: absolute;
-    top: -2px;
-    right: -2px;
+    top: -4px;
+    right: -4px;
     background: var(--accent);
     color: #000;
     font-size: 0.65rem;
     font-weight: 800;
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 2px solid var(--bg-card);
 }
 
 .cart-btn .icon-badge {
@@ -349,6 +350,10 @@
     justify-content: center;
 }
 
+.login-icon {
+    display: none;
+}
+
 /* Hamburger */
 .hamburger {
     display: none;
@@ -420,16 +425,46 @@
 }
 
 @media (max-width: 400px) {
-    .navbar-logo .logo-text {
-        font-size: 1.1rem;
-    }
-    
-    .nav-icon-btn {
-        padding: 0.3rem;
+    .navbar-inner {
+        padding: 0 0.75rem;
+        gap: 0.25rem;
     }
 
-    .navbar-inner {
-        padding: 0 0.5rem;
+    .navbar-actions {
+        gap: 0.15rem;
+    }
+
+    .nav-icon-btn {
+        padding: 0.35rem;
+        font-size: 1.1rem;
+    }
+
+    .login-btn {
+        padding: 0.4rem;
+        min-width: unset;
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+    }
+
+    .login-text {
+        display: none;
+    }
+
+    .login-icon {
+        display: block;
+        font-size: 1.2rem;
+    }
+
+    .icon-badge {
+        width: 16px;
+        height: 16px;
+        font-size: 0.6rem;
+        top: -2px;
+        right: -2px;
     }
 }
 

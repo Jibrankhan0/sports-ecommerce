@@ -173,7 +173,10 @@ export default function Navbar() {
                             )}
                         </div>
                     ) : (
-                        <Link to="/login" className="btn btn-primary btn-sm">Login</Link>
+                        <Link to="/login" className="btn btn-primary btn-sm login-btn">
+                            <span className="login-text">Login</span>
+                            <span className="login-icon">👤</span>
+                        </Link>
                     )}
                     <button className="hamburger" onClick={() => setMenuOpen(p => !p)}>☰</button>
                 </div>
