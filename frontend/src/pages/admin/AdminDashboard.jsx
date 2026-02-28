@@ -38,28 +38,28 @@ export default function AdminDashboard() {
 
             <div className="dashboard-charts-grid">
                 <div className="card dashboard-card">
-                    <h3 style={{ marginBottom: '1.5rem', fontFamily: 'Rajdhani' }}>Monthly Revenue</h3>
+                    <h3 className="section-subtitle" style={{ marginBottom: '1.25rem', color: 'var(--text)', fontWeight: 700 }}>Monthly Revenue</h3>
                     <div style={{ height: '300px' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={stats.monthlyRevenue}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                                <XAxis dataKey="month" stroke="var(--text-dim)" />
-                                <YAxis stroke="var(--text-dim)" />
-                                <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }} />
-                                <Area type="monotone" dataKey="total" stroke="var(--accent)" fill="rgba(0, 212, 255, 0.1)" />
+                                <XAxis dataKey="month" stroke="var(--text-dim)" fontSize={12} />
+                                <YAxis stroke="var(--text-dim)" fontSize={12} />
+                                <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
+                                <Area type="monotone" dataKey="total" stroke="var(--accent)" fill="rgba(0, 212, 255, 0.1)" strokeWidth={2} />
                             </AreaChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
-                <div className="card" style={{ padding: '1.5rem' }}>
-                    <h3 style={{ marginBottom: '1.5rem', fontFamily: 'Rajdhani' }}>Top Selling Products</h3>
+                <div className="card dashboard-card">
+                    <h3 className="section-subtitle" style={{ marginBottom: '1.25rem', color: 'var(--text)', fontWeight: 700 }}>Top Products</h3>
                     <div style={{ height: '300px' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={stats.topProducts}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                                <XAxis dataKey="name" stroke="var(--text-dim)" />
-                                <YAxis stroke="var(--text-dim)" />
-                                <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }} />
+                                <XAxis dataKey="name" stroke="var(--text-dim)" fontSize={10} />
+                                <YAxis stroke="var(--text-dim)" fontSize={12} />
+                                <Tooltip contentStyle={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: '8px' }} />
                                 <Bar dataKey="sold" fill="var(--accent)" radius={[4, 4, 0, 0]} />
                             </BarChart>
                         </ResponsiveContainer>
@@ -67,8 +67,8 @@ export default function AdminDashboard() {
                 </div>
             </div>
 
-            <div className="card" style={{ padding: '1.5rem' }}>
-                <h3 style={{ marginBottom: '1.5rem', fontFamily: 'Rajdhani' }}>Low Stock Alert</h3>
+            <div className="card dashboard-card">
+                <h3 className="section-subtitle" style={{ marginBottom: '1.25rem', color: 'var(--text)', fontWeight: 700 }}>Low Stock Alert</h3>
                 <div className="admin-table-container">
                     <table className="admin-table">
                         <thead>
