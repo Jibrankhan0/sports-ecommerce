@@ -6,18 +6,30 @@ const User = require('../models/User');
 const { adminAuth } = require('../middleware/auth');
 const multer = require('multer');
 const path = require('path');
+const { v2: cloudinary } = require('cloudinary');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const router = express.Router();
 
-// Multer config for image uploads
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, path.join(__dirname, '../uploads')),
-    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/\s/g, '_'))
+// Cloudinary Config
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
 });
-const upload = multer({
-    storage, limits: { fileSize: 10 * 1024 * 1024 }, fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) cb(null, true);
-        else cb(new Error('Only images allowed'));
+
+// Cloudinary Storage Config
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'sports-ecommerce',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+        public_id: (req, file) => Date.now() + '-' + file.originalname.split('.')[0]
     }
+});
+
+const upload = multer({
+    storage,
+    limits: { fileSize: 10 * 1024 * 1024 }
 });
 
 // Wrapper to handle multer errors
@@ -124,7 +136,7 @@ router.post('/products', adminAuth, uploadMiddleware, async (req, res) => {
         const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
         let images = [];
         if (req.files && req.files.length) {
-            images = req.files.map(f => `/uploads/${f.filename}`);
+            images = req.files.map(f => f.path); // Cloudinary returns the full URL in .path
         }
 
         const productData = {
@@ -165,7 +177,7 @@ router.put('/products/:id', adminAuth, uploadMiddleware, async (req, res) => {
         }
 
         if (req.files && req.files.length) {
-            const newImages = req.files.map(f => `/uploads/${f.filename}`);
+            const newImages = req.files.map(f => f.path); // Cloudinary returns the full URL in .path
             images = [...images, ...newImages];
         }
 
