@@ -28,13 +28,15 @@ export default function AdminOrders() {
                 setSelectedOrder(res.data);
             }
         } catch (err) {
-            toast.error('Failed to update status');
+            console.error('Status Update Error:', err);
+            const msg = err.response?.data?.message || 'Failed to update status';
+            toast.error(msg);
         }
     };
 
     const viewOrder = async (order) => {
         try {
-            const res = await API.get(`/admin/orders/${order.id}`);
+            const res = await API.get(`/admin/orders/${order._id}`);
             setSelectedOrder(res.data);
             setShowModal(true);
         } catch (err) {
@@ -64,7 +66,7 @@ export default function AdminOrders() {
                     </thead>
                     <tbody>
                         {orders.map(o => (
-                            <tr key={o.id}>
+                            <tr key={o._id}>
                                 <td><strong>#{o.order_number}</strong></td>
                                 <td>
                                     <div style={{ fontWeight: 600 }}>{o.customer_name}</div>
@@ -76,16 +78,16 @@ export default function AdminOrders() {
                                         {o.status.toUpperCase()}
                                     </span>
                                 </td>
-                                <td>{new Date(o.created_at).toLocaleDateString()}</td>
+                                <td>{o.createdAt ? new Date(o.createdAt).toLocaleDateString() : 'Invalid Date'}</td>
                                 <td className="actions-cell">
                                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                                         <button className="btn btn-ghost btn-sm" onClick={() => viewOrder(o)}>View</button>
-                                        <select className="form-control btn-sm" style={{ width: 'auto', padding: '0.2rem' }} value={o.status} onChange={(e) => handleStatusUpdate(o.id, e.target.value)}>
-                                            <option value="pending">P</option>
-                                            <option value="proc">Pr</option>
-                                            <option value="ship">Sh</option>
-                                            <option value="del">De</option>
-                                            <option value="can">Ca</option>
+                                        <select className="form-control btn-sm" style={{ width: 'auto', padding: '0.2rem' }} value={o.status} onChange={(e) => handleStatusUpdate(o._id, e.target.value)}>
+                                            <option value="pending">Pending</option>
+                                            <option value="processing">Processing</option>
+                                            <option value="shipped">Shipped</option>
+                                            <option value="delivered">Delivered</option>
+                                            <option value="cancelled">Cancelled</option>
                                         </select>
                                     </div>
                                 </td>
@@ -130,8 +132,8 @@ export default function AdminOrders() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {selectedOrder.items.map(item => (
-                                            <tr key={item.id}>
+                                        {selectedOrder.items.map((item, idx) => (
+                                            <tr key={item._id || idx}>
                                                 <td>{item.product_name}</td>
                                                 <td>{item.quantity}</td>
                                                 <td>Rs. {Number(item.price * item.quantity).toLocaleString()}</td>
@@ -149,8 +151,8 @@ export default function AdminOrders() {
                         <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end', gap: '0.75rem' }}>
                             {selectedOrder.status !== 'delivered' && selectedOrder.status !== 'cancelled' && (
                                 <>
-                                    <button className="btn btn-primary btn-sm" onClick={() => handleStatusUpdate(selectedOrder.id, 'delivered')}>Deliver</button>
-                                    <button className="btn btn-ghost btn-danger btn-sm" onClick={() => handleStatusUpdate(selectedOrder.id, 'cancelled')}>Cancel</button>
+                                    <button className="btn btn-primary btn-sm" onClick={() => handleStatusUpdate(selectedOrder._id, 'delivered')}>Deliver</button>
+                                    <button className="btn btn-ghost btn-danger btn-sm" onClick={() => handleStatusUpdate(selectedOrder._id, 'cancelled')}>Cancel</button>
                                 </>
                             )}
                         </div>
