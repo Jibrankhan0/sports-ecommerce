@@ -10,6 +10,7 @@ import { ThemeProvider } from './context/ThemeContext';
 // Components
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import ScrollToTop from './components/ScrollToTop';
 
 // Pages
 import Home from './pages/Home';
@@ -41,6 +42,7 @@ export default function App() {
         <CartProvider>
           <WishlistProvider>
             <Router>
+              <ScrollToTop />
               <Toaster position="bottom-right" toastOptions={{
                 style: {
                   background: 'var(--bg-card)',

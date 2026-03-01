@@ -76,7 +76,9 @@ export default function AdminProducts() {
             setImages([]);
             fetchProducts();
         } catch (err) {
-            toast.error('Operation failed');
+            console.error('Operation Error:', err);
+            const msg = err.response?.data?.message || 'Operation failed';
+            toast.error(msg);
         }
     };
 

@@ -99,9 +99,14 @@ router.get('/products', adminAuth, async (req, res) => {
 
 router.post('/products', adminAuth, upload.array('images', 5), async (req, res) => {
     try {
+        console.log('--- PRODUCT UPLOAD START ---');
+        console.log('Body:', req.body);
+        console.log('Files:', req.files);
+
         const { name, description, specifications, price, discount_price, stock, category_id, brand, is_featured, is_trending, is_new_arrival, is_best_seller } = req.body;
 
         if (!name || !price) {
+            console.warn('❌ Missing name or price');
             return res.status(400).json({ message: 'Name and Price are required' });
         }
 
@@ -113,7 +118,7 @@ router.post('/products', adminAuth, upload.array('images', 5), async (req, res) 
 
         const product = new Product({
             name, slug, description, specifications, price, brand: brand || 'Generic', stock: stock || 0, images,
-            category: (category_id && category_id !== 'undefined') ? category_id : null,
+            category: (category_id && category_id !== 'undefined' && category_id !== '') ? category_id : null,
             discount_price: discount_price || null,
             is_featured: is_featured === 'true',
             is_trending: is_trending === 'true',
@@ -122,12 +127,21 @@ router.post('/products', adminAuth, upload.array('images', 5), async (req, res) 
         });
 
         await product.save();
+        console.log('✅ Product saved:', product._id);
         res.status(201).json({ message: 'Product created', id: product._id });
-    } catch (err) { res.status(500).json({ message: err.message }); }
+    } catch (err) {
+        console.error('❌ PRODUCT UPLOAD ERROR:', err);
+        res.status(500).json({ message: err.message });
+    }
 });
 
 router.put('/products/:id', adminAuth, upload.array('images', 5), async (req, res) => {
     try {
+        console.log('--- PRODUCT UPDATE START ---');
+        console.log('ID:', req.params.id);
+        console.log('Body:', req.body);
+        console.log('Files:', req.files);
+
         const { name, description, specifications, price, discount_price, stock, category_id, brand, is_featured, is_trending, is_new_arrival, is_best_seller, existing_images } = req.body;
 
         let images = [];
@@ -140,7 +154,7 @@ router.put('/products/:id', adminAuth, upload.array('images', 5), async (req, re
 
         const updateData = {
             name, description, specifications, price, brand, stock, images,
-            category: category_id || null,
+            category: (category_id && category_id !== 'undefined' && category_id !== '') ? category_id : null,
             discount_price: discount_price || null,
             is_featured: is_featured === 'true',
             is_trending: is_trending === 'true',
@@ -149,8 +163,12 @@ router.put('/products/:id', adminAuth, upload.array('images', 5), async (req, re
         };
 
         await Product.findByIdAndUpdate(req.params.id, updateData);
+        console.log('✅ Product updated');
         res.json({ message: 'Product updated' });
-    } catch (err) { res.status(500).json({ message: err.message }); }
+    } catch (err) {
+        console.error('❌ PRODUCT UPDATE ERROR:', err);
+        res.status(500).json({ message: err.message });
+    }
 });
 
 router.delete('/products/:id', adminAuth, async (req, res) => {
