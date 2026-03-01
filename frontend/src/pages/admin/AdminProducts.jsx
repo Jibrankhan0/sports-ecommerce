@@ -56,6 +56,11 @@ export default function AdminProducts() {
         e.preventDefault();
         const formData = new FormData();
         Object.keys(form).forEach(key => formData.append(key, form[key]));
+
+        if (editingProduct && editingProduct.images) {
+            formData.append('existing_images', JSON.stringify(editingProduct.images));
+        }
+
         if (images.length > 0) {
             for (let i = 0; i < images.length; i++) {
                 formData.append('images', images[i]);

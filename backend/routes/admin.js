@@ -14,11 +14,26 @@ const storage = multer.diskStorage({
     filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/\s/g, '_'))
 });
 const upload = multer({
-    storage, limits: { fileSize: 5 * 1024 * 1024 }, fileFilter: (req, file, cb) => {
+    storage, limits: { fileSize: 10 * 1024 * 1024 }, fileFilter: (req, file, cb) => {
         if (file.mimetype.startsWith('image/')) cb(null, true);
         else cb(new Error('Only images allowed'));
     }
 });
+
+// Wrapper to handle multer errors
+const uploadMiddleware = (req, res, next) => {
+    const uploadTask = upload.array('images', 5);
+    uploadTask(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            console.error('Multer Error:', err);
+            return res.status(400).json({ message: `Upload error: ${err.message}` });
+        } else if (err) {
+            console.error('Other Upload Error:', err);
+            return res.status(400).json({ message: err.message });
+        }
+        next();
+    });
+};
 
 // ---- ANALYTICS (Renamed to /stats for frontend) ----
 router.get('/stats', adminAuth, async (req, res) => {
@@ -97,16 +112,12 @@ router.get('/products', adminAuth, async (req, res) => {
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
-router.post('/products', adminAuth, upload.array('images', 5), async (req, res) => {
+router.post('/products', adminAuth, uploadMiddleware, async (req, res) => {
     try {
         console.log('--- PRODUCT UPLOAD START ---');
-        console.log('Body:', req.body);
-        console.log('Files:', req.files);
-
         const { name, description, specifications, price, discount_price, stock, category_id, brand, is_featured, is_trending, is_new_arrival, is_best_seller } = req.body;
 
         if (!name || !price) {
-            console.warn('❌ Missing name or price');
             return res.status(400).json({ message: 'Name and Price are required' });
         }
 
@@ -116,16 +127,20 @@ router.post('/products', adminAuth, upload.array('images', 5), async (req, res) 
             images = req.files.map(f => `/uploads/${f.filename}`);
         }
 
-        const product = new Product({
+        const productData = {
             name, slug, description, specifications, price, brand: brand || 'Generic', stock: stock || 0, images,
-            category: (category_id && category_id !== 'undefined' && category_id !== '') ? category_id : null,
             discount_price: discount_price || null,
             is_featured: is_featured === 'true',
             is_trending: is_trending === 'true',
             is_new_arrival: is_new_arrival === 'true',
             is_best_seller: is_best_seller === 'true'
-        });
+        };
 
+        if (category_id && category_id !== 'undefined' && category_id !== '') {
+            productData.category = category_id;
+        }
+
+        const product = new Product(productData);
         await product.save();
         console.log('✅ Product saved:', product._id);
         res.status(201).json({ message: 'Product created', id: product._id });
@@ -135,32 +150,39 @@ router.post('/products', adminAuth, upload.array('images', 5), async (req, res) 
     }
 });
 
-router.put('/products/:id', adminAuth, upload.array('images', 5), async (req, res) => {
+router.put('/products/:id', adminAuth, uploadMiddleware, async (req, res) => {
     try {
         console.log('--- PRODUCT UPDATE START ---');
-        console.log('ID:', req.params.id);
-        console.log('Body:', req.body);
-        console.log('Files:', req.files);
-
         const { name, description, specifications, price, discount_price, stock, category_id, brand, is_featured, is_trending, is_new_arrival, is_best_seller, existing_images } = req.body;
 
         let images = [];
         if (existing_images) {
-            try { images = JSON.parse(existing_images); } catch { images = []; }
+            try {
+                images = JSON.parse(existing_images);
+            } catch {
+                images = Array.isArray(existing_images) ? existing_images : [existing_images];
+            }
         }
+
         if (req.files && req.files.length) {
-            images = [...images, ...req.files.map(f => `/uploads/${f.filename}`)];
+            const newImages = req.files.map(f => `/uploads/${f.filename}`);
+            images = [...images, ...newImages];
         }
 
         const updateData = {
             name, description, specifications, price, brand, stock, images,
-            category: (category_id && category_id !== 'undefined' && category_id !== '') ? category_id : null,
             discount_price: discount_price || null,
             is_featured: is_featured === 'true',
             is_trending: is_trending === 'true',
             is_new_arrival: is_new_arrival === 'true',
             is_best_seller: is_best_seller === 'true'
         };
+
+        if (category_id && category_id !== 'undefined' && category_id !== '') {
+            updateData.category = category_id;
+        } else {
+            updateData.category = null;
+        }
 
         await Product.findByIdAndUpdate(req.params.id, updateData);
         console.log('✅ Product updated');
