@@ -2,10 +2,18 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const { auth } = require('../middleware/auth');
+const rateLimit = require('express-rate-limit');
 const router = express.Router();
 
+// Specific rate limiter for auth routes
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20, // limit each IP to 20 requests per windowMs for auth
+    message: { message: 'Too many authentication attempts, please try again after 15 minutes' }
+});
+
 // Register
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
     try {
         const { name, email, password, phone } = req.body;
         if (!name || !email || !password) return res.status(400).json({ message: 'All fields required' });
@@ -24,7 +32,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
