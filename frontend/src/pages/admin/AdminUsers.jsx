@@ -48,8 +48,8 @@ export default function AdminUsers() {
                     </thead>
                     <tbody>
                         {users.map(u => (
-                            <tr key={u.id}>
-                                <td>{String(u.id).slice(-4)}</td>
+                            <tr key={u._id}>
+                                <td>{String(u._id).slice(-4)}</td>
                                 <td style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
                                     {u.avatar ? <img src={u.avatar} alt="" style={{ width: '28px', height: '28px', borderRadius: '50%' }} /> : <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--accent-gradient)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', color: '#000', fontWeight: 'bold' }}>{u.name[0]}</div>}
                                     <span style={{ fontWeight: 600 }}>{u.name}</span>
@@ -60,12 +60,12 @@ export default function AdminUsers() {
                                         {u.role.toUpperCase()}
                                     </span>
                                 </td>
-                                <td>{new Date(u.created_at).toLocaleDateString()}</td>
+                                <td>{new Date(u.createdAt).toLocaleDateString()}</td>
                                 <td className="actions-cell">
                                     {u.role === 'user' ? (
-                                        <button className="btn btn-ghost btn-sm" onClick={() => handleRoleUpdate(u.id, 'admin')}>Promote</button>
+                                        <button className="btn btn-ghost btn-sm" onClick={() => handleRoleUpdate(u._id, 'admin')}>Promote</button>
                                     ) : (
-                                        <button className="btn btn-ghost btn-danger btn-sm" onClick={() => handleRoleUpdate(u.id, 'user')}>Demote</button>
+                                        <button className="btn btn-ghost btn-danger btn-sm" onClick={() => handleRoleUpdate(u._id, 'user')}>Demote</button>
                                     )}
                                 </td>
                             </tr>

@@ -296,10 +296,29 @@ router.put('/orders/:id/status', adminAuth, async (req, res) => {
 // ---- USERS ----
 router.get('/users', adminAuth, async (req, res) => {
     try {
-        const users = await User.find({ role: 'user' })
+        const users = await User.find({})
             .select('name email phone role createdAt')
             .sort({ createdAt: -1 });
         res.json(users);
+    } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+router.put('/users/:id/role', adminAuth, async (req, res) => {
+    try {
+        const { role } = req.body;
+        if (!['user', 'admin'].includes(role)) {
+            return res.status(400).json({ message: 'Invalid role' });
+        }
+
+        // Prevent demoting self? (Optional but safe)
+        if (req.user._id.toString() === req.params.id) {
+            return res.status(400).json({ message: 'You cannot change your own role' });
+        }
+
+        const user = await User.findByIdAndUpdate(req.params.id, { role }, { new: true });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        res.json({ message: `User role updated to ${role}`, user: { id: user._id, name: user.name, role: user.role } });
     } catch (err) { res.status(500).json({ message: err.message }); }
 });
 

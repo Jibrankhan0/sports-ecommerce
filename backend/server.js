@@ -22,6 +22,17 @@ const app = express();
 // Trust proxy (required for correct rate limiting behind Vercel/Railway proxies)
 app.set('trust proxy', 1);
 
+// Fix for Express 5: express-mongo-sanitize can't modify req.query because it's a getter
+app.use((req, res, next) => {
+    Object.defineProperty(req, 'query', {
+        value: { ...req.query },
+        writable: true,
+        enumerable: true,
+        configurable: true
+    });
+    next();
+});
+
 // Security Middleware
 app.use(helmet()); // Set secure HTTP headers
 app.use(mongoSanitize()); // Prevent NoSQL injection
