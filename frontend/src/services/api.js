@@ -1,9 +1,12 @@
 import axios from 'axios';
 
 let API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
 if (!API_BASE.endsWith('/api')) {
     API_BASE = `${API_BASE}/api`;
 }
+
+console.log('📡 API Base URL:', API_BASE);
 const IMG_BASE = API_BASE.replace('/api', '');
 
 const API = axios.create({

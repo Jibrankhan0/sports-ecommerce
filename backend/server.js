@@ -19,6 +19,9 @@ connectDB();
 
 const app = express();
 
+// Trust proxy (required for correct rate limiting behind Vercel/Railway proxies)
+app.set('trust proxy', 1);
+
 // Security Middleware
 app.use(helmet()); // Set secure HTTP headers
 app.use(mongoSanitize()); // Prevent NoSQL injection
@@ -33,8 +36,22 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // Middleware
+const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    process.env.CLIENT_URL
+].filter(Boolean);
+
 app.use(cors({
-    origin: process.env.NODE_ENV === 'production' ? process.env.CLIENT_URL : 'http://localhost:5173',
+    origin: (origin, callback) => {
+        // Allow requests with no origin (like mobile apps or curl)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV !== 'production') {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 app.use(express.json({ limit: '10kb' })); // Body limit to prevent DOS
@@ -57,7 +74,9 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date() }
 
 // Error handler
 app.use((err, req, res, next) => {
-    if (process.env.NODE_ENV === 'development') {
+    // Always log error details in the console for debugging
+    console.error(`Error: ${err.message}`);
+    if (err.stack && process.env.NODE_ENV !== 'production') {
         console.error(err.stack);
     }
 

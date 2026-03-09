@@ -18,7 +18,8 @@ router.post('/register', authLimiter, async (req, res) => {
         const { name, email, password, phone } = req.body;
         if (!name || !email || !password) return res.status(400).json({ message: 'All fields required' });
 
-        let user = await User.findOne({ email });
+        const normalizedEmail = email.toLowerCase();
+        let user = await User.findOne({ email: normalizedEmail });
         if (user) return res.status(400).json({ message: 'Email already registered' });
 
         user = new User({ name, email, password, phone });
@@ -37,11 +38,18 @@ router.post('/login', authLimiter, async (req, res) => {
         const { email, password } = req.body;
         if (!email || !password) return res.status(400).json({ message: 'Email and password required' });
 
-        const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+        const normalizedEmail = email.toLowerCase();
+        const user = await User.findOne({ email: normalizedEmail });
+        if (!user) {
+            console.log(`Login failed: User not found for email ${normalizedEmail}`);
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
 
         const isMatch = await user.comparePassword(password);
-        if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+        if (!isMatch) {
+            console.log(`Login failed: Password mismatch for email ${normalizedEmail}`);
+            return res.status(400).json({ message: 'Invalid credentials' });
+        }
 
         const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRES_IN || '7d' });
         const userSafe = user.toObject();
